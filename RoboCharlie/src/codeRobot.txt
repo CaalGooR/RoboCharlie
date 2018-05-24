@@ -1,0 +1,5 @@
+inicio-programa
+	int : x = 500+1 ; 
+	float : y = 5 + 1;
+	
+	
