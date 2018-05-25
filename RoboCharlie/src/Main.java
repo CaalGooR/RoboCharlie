@@ -16,7 +16,7 @@ public class Main {
 		//System.out.println(pseuLexer.tokens);
 		//String TokenS = "inicio-programa";
 		parser = new PseudoParser(pseuLexer);
-
+		System.out.print("Termino");
 	}
 
 }

@@ -1,5 +1,15 @@
 inicio-programa
-	int : x = 500+1 ; 
-	float : y = 5 + 1;
+
+	int : x = 1 + 1;
+	int : y = x + 1;
 	
+	x = y + 4
+	y = y + y
+	
+	mover_izq(x)
+	mover_der(3)
+	mover_parabol(0)
+	mover_diag(4)
+	
+fin-programa
 	

@@ -35,8 +35,8 @@ public class PseudoParser extends Parser {
 		
 		match("INICIOPROGRAMA");
 		declaraciones();
+		enunciados();
 		System.out.println(symbolTable.symContent);
-		//enunciados();
 	}
 	
 	private void enunciados() {
@@ -52,47 +52,67 @@ public class PseudoParser extends Parser {
 		if(lookahead.type.toString().equals("VARIABLE")){
 			asignacion();
 		}
-		else if(lookahead.type.toString().equals("LEER")) {
-			leer();
+		else if(lookahead.type.toString().equals("MOVIMIENTO")) {
+			mover();
 		}
-		else if(lookahead.type.toString().equals("ESCRIBIR")) {
-			escribir();
-		}
-		else if(lookahead.type.toString().equals("SI")) {
-			si();
-		}
-		else if(lookahead.type.toString().equals("MIENTRAS")) {
-			mientras();
-		}
+		
 		
 	}
 	
+	private void mover() {
+		System.out.println("mover");
+		match("MOVIMIENTO");
+		match("GUIONBAJO");
+		tipo_movimiento();
+		if (lookahead.type.toString().equals("MOVIMIENTO"))
+			mover();
+	}
+
+	private void tipo_movimiento() {
+		String tpMovimiento = lookahead.data;
+		System.out.println(tpMovimiento);
+		match("MOVIMIENTOS");
+		match("PARENTESISIZQ");
+		System.out.println(valor());
+		consume();
+		match("PARENTESISDER");
+	}
+
 	private void asignacion() {
-		existe(lookahead.data);
+		int auxValor = 0;
+		String currentVariable = lookahead.data;
+		existe(currentVariable);
 		match("VARIABLE");
 		match("IGUAL");
-		operacion();
+		int r = operacion();
+		System.out.println("op = "+r);
+		symbolTable.symContent.replace(currentVariable,r);
 	}
 	
 	
 	private int operacion() {
-		
 		int resultado = valor();
+		int n;
+		consume();
 		if(lookahead.type.toString().equals("OPARITMETICO")) {
-			String operador = lookahead.data;
+			
+			String operador = lookahead.data; // Optenemos el operador 
+			consume();
+			
+			n = valor();	// Optenemos el valor
 			consume();
 			
 			if (operador.equals("+"))
-				return resultado + valor();
+				return resultado + n;
 			
 			else if (operador.equals("-"))
-				return resultado - valor();
+				return resultado - n;
 			
 			else if (operador.equals("*"))
-				return resultado * valor();
+				return resultado * n;
 			
 			else if (operador.equals("/"))
-				return resultado / valor();
+				return resultado / n;
           
 		}
 		else
@@ -105,62 +125,13 @@ public class PseudoParser extends Parser {
 		int valor;
 		if (lookahead.type.toString().equals("NUMERO")){
 			valor = Integer.parseInt(lookahead.data);
-			consume();
 			return valor;
 		}
 		else if (lookahead.type.toString().equals("VARIABLE")){
 			valor = existe(lookahead.data);
-			consume();
 			return valor;
 		}
-		return 0;
-	}
-	
-	private void leer() {
-		match("LEER");
-		match("CADENA");
-		match("COMA");
-		existe(lookahead.data);
-		match("VARIABLE"); 
-	}
-	
-	private void escribir() {
-		match("ESCRIBIR");
-		match("CADENA");
-		if(lookahead.type.toString().equals("COMA")) {
-			consume();
-			existe(lookahead.data);
-			match("VARIABLE");
-		}
-	}
-	
-	private void si() {
-		match("SI");
-		match("PARENTESISIZQ");
-		comparacion();
-		match("PARENTESISDER");
-		match("ENTONCES");
-		while(!(lookahead.type.toString().equals("FINSI"))){
-			enunciado();	
-		}
-		consume();
-	}
-	
-	private void mientras() {
-		match("MIENTRAS");
-		match("PARENTESISIZQ");
-		comparacion();
-		match("PARENTESISDER");
-		while(!(lookahead.type.toString().equals("FINMIENTRAS"))){
-			enunciado();
-		}
-		consume();
-	}
-	
-	private void comparacion() {
-		valor();
-		match("OPERACIONAL");
-		valor();
+		return -1;
 	}
 	
 	private void declaraciones() {
