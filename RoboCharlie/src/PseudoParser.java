@@ -13,6 +13,7 @@ import java.io.BufferedWriter;
 
 public class PseudoParser extends Parser {
 	
+	private int auxValue;
 	private VariableSymbol vSymbol;
 	private SymbolTable symbolTable = new SymbolTable() ;
 	private ArrayList<String> variables = new ArrayList<String>();
@@ -60,7 +61,6 @@ public class PseudoParser extends Parser {
 	}
 	
 	private void mover() {
-		System.out.println("mover");
 		match("MOVIMIENTO");
 		match("GUIONBAJO");
 		tipo_movimiento();
@@ -70,54 +70,72 @@ public class PseudoParser extends Parser {
 
 	private void tipo_movimiento() {
 		String tpMovimiento = lookahead.data;
-		System.out.println(tpMovimiento);
+		auxValue = 0;
 		match("MOVIMIENTOS");
 		match("PARENTESISIZQ");
-		System.out.println(valor());
-		consume();
+		auxValue = valor();
+		if (lookahead.type.toString().equals("OPERITMETICO"))
+			auxValue = operacion(auxValue); // trabajando aqui
 		match("PARENTESISDER");
 	}
 
 	private void asignacion() {
 		int auxValor = 0;
+		int r;
 		String currentVariable = lookahead.data;
 		existe(currentVariable);
 		match("VARIABLE");
 		match("IGUAL");
-		int r = operacion();
-		System.out.println("op = "+r);
-		symbolTable.symContent.replace(currentVariable,r);
+		auxValor = valor();
+		consume();
+		System.out.println(lookahead.data);
+		if (lookahead.type.toString().equals("OPARITMETICO")) {
+			r = operacion(auxValor);
+			symbolTable.symContent.replace(currentVariable,r);
+		}
+		else
+			symbolTable.symContent.replace(currentVariable,auxValor);
 	}
 	
 	
-	private int operacion() {
-		int resultado = valor();
-		int n;
-		consume();
+	private int operacion(int x) {
+		int resultado = x;
+		auxValue = 0;
 		if(lookahead.type.toString().equals("OPARITMETICO")) {
 			
 			String operador = lookahead.data; // Optenemos el operador 
 			consume();
 			
-			n = valor();	// Optenemos el valor
+			auxValue = valor();	// Optenemos el valor
 			consume();
 			
-			if (operador.equals("+"))
-				return resultado + n;
+			if (operador.equals("+") && !lookahead.type.toString().equals("OPARITMETICO"))
+				return resultado + auxValue;
 			
-			else if (operador.equals("-"))
-				return resultado - n;
+			else if (operador.equals("-") && !lookahead.type.toString().equals("OPARITMETICO"))
+				return resultado - auxValue;
 			
-			else if (operador.equals("*"))
-				return resultado * n;
+			else if (operador.equals("*") && !lookahead.type.toString().equals("OPARITMETICO"))
+				return resultado * auxValue;
 			
-			else if (operador.equals("/"))
-				return resultado / n;
-          
+			else if (operador.equals("/") && !lookahead.type.toString().equals("OPARITMETICO"))
+				return resultado / auxValue;
+			else {
+				if (operador.equals("+"))
+					return operacion(resultado) + auxValue;
+				
+				else if (operador.equals("-"))
+					return operacion(resultado) - auxValue;
+				
+				else if (operador.equals("*"))
+					return operacion(resultado) * auxValue;
+				
+				else if (operador.equals("/"))
+					return operacion(resultado) / auxValue;
+			}
 		}
 		else
 			throw new Error("Error en operacion cerca de: "+lookahead.data);
-		
 		return 0;
 	}
 	
@@ -135,27 +153,51 @@ public class PseudoParser extends Parser {
 	}
 	
 	private void declaraciones() {
+		int auxValue = 0;
+		int r = 0;
 		if (lookahead.type.toString().equals("TIPO")){
 			String typeAux = lookahead.data;
 			consume();
 			match("DOSPUNTOS");
 			String currentToken = lookahead.data;
 			lista_variables(typeAux);
+			match("VARIABLE");
+			
 			if (lookahead.type.toString().equals("PUNTOCOMA")) {
 				consume();
+				symbolTable.symContent.replace(currentToken,0);
 				declaraciones();
 			}
 			else if(lookahead.type.toString().equals("IGUAL")) {
 				consume();
-				Integer r = operacion();
-				if (r.intValue() != 0) {
-					symbolTable.symContent.replace(currentToken,r);
-				}
-				if (lookahead.type.toString().equals("PUNTOCOMA")) {
+				if (lookahead.type.toString().equals("NUMERO") || 
+						lookahead.type.toString().equals("VARIABLE")) {
+					
+					auxValue = valor();
 					consume();
-					declaraciones();
+					
+					if (lookahead.type.toString().equals("PUNTOCOMA")) {
+						symbolTable.symContent.replace(currentToken,auxValue);
+						consume();
+						declaraciones();
+					}
+					else {
+						r = operacion(auxValue);
+						symbolTable.symContent.replace(currentToken,r);
+						if (lookahead.type.toString().equals("PUNTOCOMA")) {
+							consume();
+							declaraciones();
+						}
+						else
+							throw new Error("Falta ';' serca de :"+lookahead.data);
+					}
 				}
-			}
+				else
+					throw new Error("Error cerca de :"+lookahead.data);
+				
+			}else
+				throw new Error("Error cerca de :"+lookahead.data);
+			
 		}
 	}
 	
@@ -168,22 +210,8 @@ public class PseudoParser extends Parser {
 			symbolTable.define(new VariableSymbol(token,tipo));
 		}	
 		else
-			throw new Error("Variable previamente declarada o tipo in existente");
-		
-		match("VARIABLE");
-			
+			throw new Error("Variable previamente declarada o tipo in existente");		
 	}
-	
-//	private void agregaSymbol() {
-//		int i = 0;
-//		Symbol tipo = symbolTable.resolve(lookahead.data);
-//		if (tipo != null){
-//			for (String s : variables) {
-//				vSymbol = new VariableSymbol(variables.get(i++),tipo);
-//				symbolTable.define(vSymbol);
-//			}
-//		}
-//	}
 	
 	private int existe(String token) {
 		
@@ -191,8 +219,7 @@ public class PseudoParser extends Parser {
 		if (tipo == null) 
 			throw new Error("Variable existente "+lookahead.data);
 		
-		return symbolTable.symContent.get(tipo.name).intValue();
-			
+		return symbolTable.symContent.get(tipo.name).intValue();		
 	}
 	
 }
