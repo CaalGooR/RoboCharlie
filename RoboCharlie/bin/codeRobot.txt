@@ -1,15 +1,16 @@
 inicio-programa
-
-	int : x = 1 + 1;
+	int : x = 1 + 3 + 5 ;
 	int : y = x + 1;
+	int : z = x + y;
+	int : i;
 	
-	x = y + 4
-	y = y + y
+	x = 2 + 2
+	z = x + y
 	
-	mover_izq(x)
-	mover_der(3)
-	mover_parabol(0)
-	mover_diag(4)
+	mover_izq(2)
+	mover_der(x)
+	for(i=0;i<5;i++)
+		mover_izq(2)
+	ENDF
 	
 fin-programa
-	

@@ -37,12 +37,10 @@ public class PseudoParser extends Parser {
 		match("INICIOPROGRAMA");
 		declaraciones();
 		enunciados();
-		System.out.println(symbolTable.symContent);
 	}
 	
 	private void enunciados() {
 		
-		String y = lookahead.type.toString();
 		while(!(lookahead.type.toString().equals("FINPROGRAMA"))){
 			enunciado();
 		}
@@ -57,9 +55,8 @@ public class PseudoParser extends Parser {
 			mover();
 		}
 		
-		
 	}
-	
+
 	private void mover() {
 		match("MOVIMIENTO");
 		match("GUIONBAJO");
@@ -76,6 +73,7 @@ public class PseudoParser extends Parser {
 		auxValue = valor();
 		if (lookahead.type.toString().equals("OPERITMETICO"))
 			auxValue = operacion(auxValue); // trabajando aqui
+		consume();
 		match("PARENTESISDER");
 	}
 
@@ -134,6 +132,11 @@ public class PseudoParser extends Parser {
 					return operacion(resultado) / auxValue;
 			}
 		}
+		else if(lookahead.type.toString().equals("INCREMENTO")) 
+			return auxValue+1;
+		else if(lookahead.type.toString().equals("DECREMENTO"))
+			return auxValue-1;
+			
 		else
 			throw new Error("Error en operacion cerca de: "+lookahead.data);
 		return 0;
@@ -220,6 +223,24 @@ public class PseudoParser extends Parser {
 			throw new Error("Variable existente "+lookahead.data);
 		
 		return symbolTable.symContent.get(tipo.name).intValue();		
+	}
+	
+	public void ciclo() {
+		match("FOR");
+		match("PARENTESISIZQ");
+		asignacion();
+		match("PUNTOCOMA");
+		comparacion();
+		match("PUNTOCOMA");
+		valor();
+		match("PARENTESISDER");
+		while(!(lookahead.type.toString().equals("ENDF")))
+			enunciado();
+		
+	}
+
+	private void comparacion() {
+		
 	}
 	
 }
