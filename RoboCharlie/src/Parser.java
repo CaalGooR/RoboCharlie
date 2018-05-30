@@ -1,3 +1,7 @@
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+
 import Lexer.Lexer;
 import PseudoLexer.*;
 import PseudoLexer.PseudoLexer.Token;
@@ -29,4 +33,16 @@ public class Parser {
 		else throw new Error("Expecting");
 	}
 	public void consume() { lookahead = pseudoInput.nextToken(); }
+	
+	public void escribirIntermedio(String interCode) {
+		try{
+			File file = new File ("src/codeIntermedio.rob");
+			BufferedWriter out = new BufferedWriter(new FileWriter(file)); 
+			out.write(interCode);
+			out.close();
+		}
+		catch(Exception e) {
+			System.out.println("Error "+e);
+		}
+	}
 }

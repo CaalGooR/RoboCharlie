@@ -24,19 +24,11 @@ public class PseudoParser extends Parser {
 	}
 
 	private void programa(){    
-		try{
-			File file = new File ("src/codeIntermedio.rob");
-			BufferedWriter out = new BufferedWriter(new FileWriter(file)); 
-			out.write(interCode);
-			out.close();
-		}
-		catch(Exception e) {
-			System.out.println("Error "+e);
-		}
-		
 		match("INICIOPROGRAMA");
+		interCode = "inicio \n";
 		declaraciones();
 		enunciados();
+		escribirIntermedio(interCode);
 	}
 	
 	private void enunciados() {
@@ -48,12 +40,14 @@ public class PseudoParser extends Parser {
 	}
 
 	private void enunciado() {
-		if(lookahead.type.toString().equals("VARIABLE")){
+		if(lookahead.type.toString().equals("VARIABLE"))
 			asignacion();
-		}
-		else if(lookahead.type.toString().equals("MOVIMIENTO")) {
+		else if(lookahead.type.toString().equals("MOVIMIENTO"))
 			mover();
-		}
+		else if (lookahead.type.toString().equals("FOR"))
+			ciclo();
+		else if(lookahead.type.toString().equals("IF"))
+			condicionalIF();
 		
 	}
 
@@ -66,14 +60,17 @@ public class PseudoParser extends Parser {
 	}
 
 	private void tipo_movimiento() {
-		String tpMovimiento = lookahead.data;
 		auxValue = 0;
+		interCode += "mov_"+lookahead.data+"(";
 		match("MOVIMIENTOS");
 		match("PARENTESISIZQ");
 		auxValue = valor();
-		if (lookahead.type.toString().equals("OPERITMETICO"))
-			auxValue = operacion(auxValue); // trabajando aqui
+		interCode += lookahead.data;
 		consume();
+		if (lookahead.type.toString().equals("OPERITMETICO")) {
+			auxValue = operacion(auxValue);
+			interCode += ") \n";
+		}
 		match("PARENTESISDER");
 	}
 
@@ -86,13 +83,15 @@ public class PseudoParser extends Parser {
 		match("IGUAL");
 		auxValor = valor();
 		consume();
-		System.out.println(lookahead.data);
 		if (lookahead.type.toString().equals("OPARITMETICO")) {
+			interCode += currentVariable +" = "+auxValor+" ";
 			r = operacion(auxValor);
 			symbolTable.symContent.replace(currentVariable,r);
 		}
-		else
+		else {
 			symbolTable.symContent.replace(currentVariable,auxValor);
+			interCode +="\t"+currentVariable+" = "+ auxValor+ "\n";
+		}
 	}
 	
 	
@@ -104,39 +103,50 @@ public class PseudoParser extends Parser {
 			String operador = lookahead.data; // Optenemos el operador 
 			consume();
 			
+			
 			auxValue = valor();	// Optenemos el valor
 			consume();
 			
-			if (operador.equals("+") && !lookahead.type.toString().equals("OPARITMETICO"))
+			
+			if (operador.equals("+") && !lookahead.type.toString().equals("OPARITMETICO")) {
+				interCode +="+ "+auxValue+"\n";
 				return resultado + auxValue;
-			
-			else if (operador.equals("-") && !lookahead.type.toString().equals("OPARITMETICO"))
+			}
+			else if (operador.equals("-") && !lookahead.type.toString().equals("OPARITMETICO")){
+				interCode +="- "+auxValue+"\n";
 				return resultado - auxValue;
-			
-			else if (operador.equals("*") && !lookahead.type.toString().equals("OPARITMETICO"))
+			}
+			else if (operador.equals("*") && !lookahead.type.toString().equals("OPARITMETICO")) {
+				interCode +="* "+auxValue+"\n";
 				return resultado * auxValue;
-			
-			else if (operador.equals("/") && !lookahead.type.toString().equals("OPARITMETICO"))
+			}
+			else if (operador.equals("/") && !lookahead.type.toString().equals("OPARITMETICO")) {
+				interCode +="/ "+auxValue+"\n";
 				return resultado / auxValue;
+			}
+			
 			else {
-				if (operador.equals("+"))
+				if (operador.equals("+")) {
+					interCode += "+ "+auxValue+" ";
 					return operacion(resultado) + auxValue;
+				}
 				
-				else if (operador.equals("-"))
+				else if (operador.equals("-")) {
+					interCode +="- "+auxValue+" ";
 					return operacion(resultado) - auxValue;
+				}
 				
-				else if (operador.equals("*"))
+				else if (operador.equals("*")) {
+					interCode +="* "+auxValue+" ";
 					return operacion(resultado) * auxValue;
+				}
 				
-				else if (operador.equals("/"))
+				else if (operador.equals("/")) {
+					interCode +="/ "+auxValue+" ";
 					return operacion(resultado) / auxValue;
+				}
 			}
 		}
-		else if(lookahead.type.toString().equals("INCREMENTO")) 
-			return auxValue+1;
-		else if(lookahead.type.toString().equals("DECREMENTO"))
-			return auxValue-1;
-			
 		else
 			throw new Error("Error en operacion cerca de: "+lookahead.data);
 		return 0;
@@ -220,7 +230,7 @@ public class PseudoParser extends Parser {
 		
 		Symbol tipo = symbolTable.resolve(lookahead.data);
 		if (tipo == null) 
-			throw new Error("Variable existente "+lookahead.data);
+			throw new Error("Variable no existe ["+lookahead.data+"]");
 		
 		return symbolTable.symContent.get(tipo.name).intValue();		
 	}
@@ -232,15 +242,30 @@ public class PseudoParser extends Parser {
 		match("PUNTOCOMA");
 		comparacion();
 		match("PUNTOCOMA");
-		valor();
+		asignacion();
 		match("PARENTESISDER");
 		while(!(lookahead.type.toString().equals("ENDF")))
 			enunciado();
-		
+		match("ENDF");
 	}
 
 	private void comparacion() {
-		
+	 int n1,n2;
+	 n1 = valor();
+	 consume();
+	 match("OPERACIONAL");
+	 n2 = valor();
+	 consume();
+	}
+	
+	public void condicionalIF() {
+		match("IF");
+		match("PARENTESISIZQ");
+		comparacion();
+		match("PARENTESISDER");
+		while (!(lookahead.type.toString().equals("ENDIF")))
+			enunciado();
+		match("ENDIF");
 	}
 	
 }
