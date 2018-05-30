@@ -1,0 +1,17 @@
+/BaseScope.class
+/BuiltInTypeSymbol.class
+/GlobalScope.class
+/Lexer/
+/LocalScope.class
+/Main.class
+/MethodSymbol.class
+/Parser.class
+/PseudoLexer/
+/PseudoParser.class
+/Scope.class
+/Symbol.class
+/SymbolTable.class
+/Type.class
+/VariableSymbol.class
+/codeIntermedio.rob
+/codeRobot.txt
