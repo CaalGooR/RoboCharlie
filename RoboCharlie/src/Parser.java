@@ -30,7 +30,7 @@ public class Parser {
 		if(siguiente.equals(x)) {
 			consume();
 		}
-		else throw new Error("Expecting");
+		else throw new Error("Expecting "+x + pseudoInput.i);
 	}
 	public void consume() { lookahead = pseudoInput.nextToken(); }
 	

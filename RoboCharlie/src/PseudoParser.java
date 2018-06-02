@@ -3,20 +3,13 @@
  * generados que provienen de la clase PseudoLexer y así mismo traducir a lenguaje C,
  * ultilizando como base las reglas gramaticales de PsudoCodigo
  * */
-
-import java.io.File;
-import java.io.FileWriter;
-import java.util.ArrayList;
-
 import PseudoLexer.PseudoLexer;
-import java.io.BufferedWriter;
 
 public class PseudoParser extends Parser {
 	
 	private int auxValue;
-	private VariableSymbol vSymbol;
+	private String cadenaAux;
 	private SymbolTable symbolTable = new SymbolTable() ;
-	private ArrayList<String> variables = new ArrayList<String>();
 	
 	public PseudoParser(PseudoLexer input) { 
 		super(input); 
@@ -25,7 +18,6 @@ public class PseudoParser extends Parser {
 
 	private void programa(){    
 		match("INICIOPROGRAMA");
-		interCode = "inicio \n";
 		declaraciones();
 		enunciados();
 		escribirIntermedio(interCode);
@@ -65,13 +57,13 @@ public class PseudoParser extends Parser {
 		match("MOVIMIENTOS");
 		match("PARENTESISIZQ");
 		auxValue = valor();
-		interCode += lookahead.data;
 		consume();
-		if (lookahead.type.toString().equals("OPERITMETICO")) {
+		if (lookahead.type.toString().equals("OPARITMETICO")) {
 			auxValue = operacion(auxValue);
-			interCode += ") \n";
 		}
+		interCode += auxValue;
 		match("PARENTESISDER");
+		interCode += ")\n";
 	}
 
 	private void asignacion() {
@@ -84,13 +76,11 @@ public class PseudoParser extends Parser {
 		auxValor = valor();
 		consume();
 		if (lookahead.type.toString().equals("OPARITMETICO")) {
-			interCode += currentVariable +" = "+auxValor+" ";
 			r = operacion(auxValor);
 			symbolTable.symContent.replace(currentVariable,r);
 		}
 		else {
 			symbolTable.symContent.replace(currentVariable,auxValor);
-			interCode +="\t"+currentVariable+" = "+ auxValor+ "\n";
 		}
 	}
 	
@@ -109,40 +99,32 @@ public class PseudoParser extends Parser {
 			
 			
 			if (operador.equals("+") && !lookahead.type.toString().equals("OPARITMETICO")) {
-				interCode +="+ "+auxValue+"\n";
 				return resultado + auxValue;
 			}
 			else if (operador.equals("-") && !lookahead.type.toString().equals("OPARITMETICO")){
-				interCode +="- "+auxValue+"\n";
 				return resultado - auxValue;
 			}
 			else if (operador.equals("*") && !lookahead.type.toString().equals("OPARITMETICO")) {
-				interCode +="* "+auxValue+"\n";
 				return resultado * auxValue;
 			}
 			else if (operador.equals("/") && !lookahead.type.toString().equals("OPARITMETICO")) {
-				interCode +="/ "+auxValue+"\n";
 				return resultado / auxValue;
 			}
 			
 			else {
 				if (operador.equals("+")) {
-					interCode += "+ "+auxValue+" ";
 					return operacion(resultado) + auxValue;
 				}
 				
 				else if (operador.equals("-")) {
-					interCode +="- "+auxValue+" ";
 					return operacion(resultado) - auxValue;
 				}
 				
 				else if (operador.equals("*")) {
-					interCode +="* "+auxValue+" ";
 					return operacion(resultado) * auxValue;
 				}
 				
 				else if (operador.equals("/")) {
-					interCode +="/ "+auxValue+" ";
 					return operacion(resultado) / auxValue;
 				}
 			}
@@ -221,6 +203,7 @@ public class PseudoParser extends Parser {
 		Symbol tipo = symbolTable.resolve(type);
 		if (lookahead.type.toString().equals("VARIABLE") && variable == null && tipo != null) {
 			symbolTable.define(new VariableSymbol(token,tipo));
+			
 		}	
 		else
 			throw new Error("Variable previamente declarada o tipo in existente");		
@@ -236,35 +219,71 @@ public class PseudoParser extends Parser {
 	}
 	
 	public void ciclo() {
+		int firstIndexToken,
+			lastIndexToken = 0;
+		
 		match("FOR");
 		match("PARENTESISIZQ");
 		asignacion();
 		match("PUNTOCOMA");
-		comparacion();
-		match("PUNTOCOMA");
-		asignacion();
-		match("PARENTESISDER");
-		while(!(lookahead.type.toString().equals("ENDF")))
-			enunciado();
-		match("ENDF");
+		firstIndexToken = pseudoInput.tokens.indexOf(lookahead);
+		while(comparacion()) {
+			match("PUNTOCOMA");
+			asignacion();
+			match("PARENTESISDER");
+			while(!(lookahead.type.toString().equals("ENDF")))
+				enunciado();
+			lastIndexToken = pseudoInput.tokens.indexOf(lookahead);
+			lookahead = pseudoInput.tokens.get(firstIndexToken);
+			pseudoInput.i = firstIndexToken;
+			consume();
+		}
+		pseudoInput.i = lastIndexToken;
+		lookahead = pseudoInput.tokens.get(lastIndexToken);
+		this.match("ENDF");
+		consume();
 	}
 
-	private void comparacion() {
-	 int n1,n2;
+	private boolean comparacion() {
+	 int n1=0,n2=0;
 	 n1 = valor();
 	 consume();
+	 cadenaAux = lookahead.data;
 	 match("OPERACIONAL");
 	 n2 = valor();
 	 consume();
+	 
+	 switch(cadenaAux) {
+	 	case "<=":
+	 		return (n1<=n2) ? true:false;
+	 	case ">=":
+	 		return (n1>=n2) ? true:false;
+	 	case "==":
+	 		return (n1==n2) ? true:false;
+	 	case "!=":
+	 		return (n1!=n2) ? true:false;
+	 	case "<":
+	 		return (n1<n2) ? true:false;
+	 	case ">":
+	 		return (n1>n2) ? true:false; 	
+	 }
+	 
+	 return false;
 	}
 	
 	public void condicionalIF() {
+		boolean resultCondition;
 		match("IF");
 		match("PARENTESISIZQ");
-		comparacion();
+		resultCondition = comparacion();
 		match("PARENTESISDER");
-		while (!(lookahead.type.toString().equals("ENDIF")))
-			enunciado();
+		System.out.println(lookahead.data);
+		if (resultCondition)
+			while (!(lookahead.type.toString().equals("ENDIF")))
+				enunciado();
+		else
+			while (!(lookahead.type.toString().equals("ENDIF")))
+				consume();
 		match("ENDIF");
 	}
 	

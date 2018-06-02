@@ -1,19 +1,18 @@
 inicio-programa
 
-	int : x = 1 + 3 + 5 ;
+	int : x ;
 	int : z = 1 + 1;
 	int : y = x + 1;
 
 	x = y + 4
 	y = y + y
+	x = 0
 	
-	mover_izq(2)
-	mover_der(x)
-	
-	for(x=0;x<5;x=x+1)
-		if (x < 2)
-			mover_der(x)
-		end-if
-	endf
+	if (x == 0)
+		for(x = 0;x<5;x=x+1)
+			mover_diag(x + y)
+		endf
+	end-if
+	mover_izq(1)
 	
 fin-programa
