@@ -1,9 +1,15 @@
-inicio 
-+ 3 + 5
-+ 1
-+ 1
-x = 12 + 4
-y = 12 + 12
-mov_izq(2mov_der(x	x = 0
-x = 0 + 1
-mov_der(x
+mov_izq(5)
+mov_arr(5)
+mov_der(5)
+mov_aba(5)
+mov_izq(1)
+mov_aba(1)
+mov_izq(1)
+mov_aba(1)
+mov_izq(1)
+mov_aba(1)
+mov_izq(1)
+mov_aba(1)
+mov_izq(1)
+mov_aba(1)
+mov_dia(5)

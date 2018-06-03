@@ -1,33 +1,24 @@
 inicio-programa
 
-	int : x = 1 + 3 + 5 ;
-<<<<<<< HEAD
-=======
-
+	int : x ;
 	int : z = 1 + 1;
-
->>>>>>> 2511d36d9c9d474e032469922e7b742e94dab181
-	int : y = x + 1;
-	int : z = x + y;
+	int : y = 3;
 	
-	x = 2 + 2
-	z = x + y
+	for (z = 0; z<1;z=z+1)
+		mover_izq(5)
+		mover_arr(5)
+		mover_der(5)
+		mover_aba(5)
+		if (z > 2)
+			x = 15 / 3
+			mover_dia(x)
+		end-if
+	endf
 	
-<<<<<<< HEAD
-	mover_izq(2)
-	mover_der(x)
-	
-
-=======
-
-	mover_izq(2)
-	mover_der(x)
-	
-	mover_izq(x)
-	mover_der(3)
-	mover_parabol(0)
-	mover_diag(4)
->>>>>>> 2511d36d9c9d474e032469922e7b742e94dab181
-
+	for (z = 0; z<5;z=z+1)
+		mover_izq(1)
+		mover_aba(1)
+	endf
+	mover_dia(5)
 	
 fin-programa

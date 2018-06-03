@@ -1,22 +1,16 @@
-import java.io.File;
-import java.io.IOException;
-import java.util.Scanner;
-
-import PseudoLexer.PseudoLexer;
+import java.io.FileNotFoundException;
 
 public class Main {
 
-	private static Scanner scanner;
-	private static PseudoParser parser;
-
-	public static void main(String[] args) throws IOException {
-		scanner = new Scanner(new File("src/codeRobot.txt"));
-		String content = scanner.useDelimiter("\\Z").next();
-		PseudoLexer pseuLexer = new PseudoLexer(content);
-		//System.out.println(pseuLexer.tokens);
-		//String TokenS = "inicio-programa";
-		parser = new PseudoParser(pseuLexer);
-		System.out.print("Termino");
+	public static void main(String[] args){
+		Thread t1;
+		try {
+			t1 = new Thread (new InterpreteGrafico());
+			t1.start();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

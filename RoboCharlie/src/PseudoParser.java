@@ -277,7 +277,6 @@ public class PseudoParser extends Parser {
 		match("PARENTESISIZQ");
 		resultCondition = comparacion();
 		match("PARENTESISDER");
-		System.out.println(lookahead.data);
 		if (resultCondition)
 			while (!(lookahead.type.toString().equals("ENDIF")))
 				enunciado();

@@ -32,7 +32,7 @@ public class PseudoLexer extends Lexer{
 		ESPACIOS("[ \t\f\r\n]+"),
 		TIPO("int|float"),
 		MOVIMIENTO("mover"),
-		MOVIMIENTOS("izq|der|diag|parabol"),
+		MOVIMIENTOS("izq|der|dia|par|arr|aba"),
 		VARIABLE("[a-zA-Z][a-zA-Z0-9]*"),
 		ERROR(".+");
 		

@@ -2,17 +2,23 @@ inicio-programa
 
 	int : x ;
 	int : z = 1 + 1;
-	int : y = x + 1;
-
-	x = y + 4
-	y = y + y
-	x = 0
+	int : y = 3;
 	
-	if (x == 0)
-		for(x = 0;x<5;x=x+1)
-			mover_diag(x + y)
-		endf
-	end-if
-	mover_izq(1)
+	for (z = 0; z<1;z=z+1)
+		mover_izq(5)
+		mover_arr(5)
+		mover_der(5)
+		mover_aba(5)
+		if (z > 2)
+			x = 15 / 3
+			mover_dia(x)
+		end-if
+	endf
+	
+	for (z = 0; z<5;z=z+1)
+		mover_izq(1)
+		mover_aba(1)
+	endf
+	mover_dia(5)
 	
 fin-programa
